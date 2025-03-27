@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app_test/models/quiz_question.dart';
 import 'package:quiz_app_test/screens/result_screen.dart';
+import 'dart:async';
 
 class QuizScreen extends StatefulWidget {
   final List<QuizQuestion> questions;
-  
   const QuizScreen({super.key, required this.questions});
 
   @override
@@ -14,28 +14,34 @@ class QuizScreen extends StatefulWidget {
 class _QuizScreenState extends State<QuizScreen> {
   int _currentQuestionIndex = 0;
   int _score = 0;
-  String? _selectedAnswer;
-  bool _answered = false;
+  bool _isAnswered = false;
+  Timer? _timer;
+  int _timeLeft = 15;
 
-  void _checkAnswer(String selected) {
-    if (!_answered) {
-      setState(() {
-        _selectedAnswer = selected;
-        _answered = true;
-        if (selected == widget.questions[_currentQuestionIndex].correctAnswer) {
-          _score++;
-        }
-      });
-    }
+  void _startTimer() {
+    _timer?.cancel();
+    _timeLeft = 15;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_timeLeft > 0) {
+        setState(() {
+          _timeLeft--;
+        });
+      } else {
+        _timer?.cancel();
+        _nextQuestion(0); // Move to next question with 0 score
+      }
+    });
   }
 
-  void _nextQuestion() {
+  void _nextQuestion(int score) {
+    _timer?.cancel();
     if (_currentQuestionIndex < widget.questions.length - 1) {
       setState(() {
+        _score += score;
         _currentQuestionIndex++;
-        _selectedAnswer = null;
-        _answered = false;
+        _isAnswered = false;
       });
+      _startTimer();
     } else {
       Navigator.pushReplacement(
         context,
@@ -46,63 +52,87 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
+  void _answerQuestion(String selectedAnswer) {
+    if (_isAnswered) return;
+    setState(() {
+      _isAnswered = true;
+    });
+    _timer?.cancel();
+    final correctAnswer = widget.questions[_currentQuestionIndex].correctAnswer;
+    int score = selectedAnswer == correctAnswer ? 1 : 0;
+    Future.delayed(const Duration(seconds: 1), () => _nextQuestion(score));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final question = widget.questions[_currentQuestionIndex];
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title: Center(child: Text('Question ${_currentQuestionIndex + 1} of ${widget.questions.length}',)), backgroundColor: Colors.blue),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                question.question,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              ...question.options.map((option) => _buildOptionButton(option)),
-              const SizedBox(height: 20),
-              if (_answered)
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue, 
-                    foregroundColor: Colors.white, 
-                  ),
-                  onPressed: _nextQuestion,
-                  child: Text(_currentQuestionIndex < widget.questions.length - 1 ? 'Next' : 'See Results'),
-                ),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Center(
+          child: Text(
+            'Question ${_currentQuestionIndex + 1}/${widget.questions.length}',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildOptionButton(String option) {
-    bool isCorrect = option == widget.questions[_currentQuestionIndex].correctAnswer;
-    bool isSelected = option == _selectedAnswer;
-
-    return GestureDetector(
-      onTap: () => _checkAnswer(option),
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: _answered
-              ? (isSelected
-                  ? (isCorrect ? Colors.green : Colors.red)
-                  : Colors.grey.shade300)
-              : const Color.fromARGB(255, 81, 83, 84),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          option,
-          style: const TextStyle(fontSize: 18, color: Colors.white),
-          textAlign: TextAlign.center,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    '$_timeLeft s',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    question.question,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 20),
+                  ...question.options.map((option) => SizedBox(
+                    width: double.infinity,
+                    child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5.0),
+                          child: ElevatedButton(
+                            onPressed: () => _answerQuestion(option),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _isAnswered
+                                  ? (option == question.correctAnswer ? Colors.green : Colors.red)
+                                  : Colors.blue,
+                            ),
+                            child: Text(option, style: const TextStyle(fontSize: 16)),
+                          ),
+                        ),
+                  )),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

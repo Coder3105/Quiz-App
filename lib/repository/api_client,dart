@@ -1,0 +1,26 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+class ApiClient {
+  final String _apiKey;
+  final Uri _uri = Uri.parse('https://api.groq.com/openai/v1/chat/completions');
+
+  ApiClient({required String apiKey}) : _apiKey = apiKey;
+
+  Future<Map<String, dynamic>> makeRequest(Map<String, dynamic> requestPayload) async {
+    final response = await http.post(
+      _uri,
+      headers: {
+        'Authorization': 'Bearer $_apiKey',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(requestPayload),
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception("API Error: ${response.statusCode} - ${response.body}");
+    }
+  }
+}

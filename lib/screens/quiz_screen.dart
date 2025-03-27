@@ -28,7 +28,7 @@ class _QuizScreenState extends State<QuizScreen> {
         });
       } else {
         _timer?.cancel();
-        _nextQuestion(0); // Move to next question with 0 score
+        _nextQuestion(0); 
       }
     });
   }
@@ -46,7 +46,7 @@ class _QuizScreenState extends State<QuizScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => ResultScreen(score: _score, total: widget.questions.length),
+          builder: (context) => ResultScreen(score: _score, totalQuestions: widget.questions.length),
         ),
       );
     }

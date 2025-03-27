@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app_test/repository/repository.dart';
 import 'package:quiz_app_test/screens/quiz_screen.dart';
+import 'package:quiz_app_test/screens/history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -46,7 +47,21 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 89, 97, 100),
-        appBar: AppBar(title: Center(child: const Text('Quiz App')), backgroundColor: Colors.blue,),
+        appBar: AppBar(
+          title: Center(child: const Text('Quiz App')), 
+          backgroundColor: Colors.blue,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.history),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HistoryScreen()),
+                );
+              },
+            ),
+          ],
+        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -93,12 +108,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               .map((category) => DropdownMenuItem(
                                     value: category,
                                     child: Text(category),
-                                  ))
+              ))
                               .toList(),
                         ),
-                      ),
-                    ],
-                  ),
+          ),
+        ],
+      ),
                 ),
                 const SizedBox(height: 20,),
                 Container(
@@ -116,49 +131,49 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  child: Column(
+        child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Select Difficulty:',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 10),
+          children: [
+            const Text(
+              'Select Difficulty:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
                       SizedBox(
                         width: double.infinity,
                         child: DropdownButton<String>(
                           isExpanded: true,
-                          value: _selectedDifficulty,
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() {
-                                _selectedDifficulty = value;
-                              });
-                            }
-                          },
-                          items: ['easy', 'medium', 'hard']
-                              .map((level) => DropdownMenuItem(
-                                    value: level,
-                                    child: Text(level.toUpperCase()),
-                                  ))
-                              .toList(),
-                        ),
+              value: _selectedDifficulty,
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _selectedDifficulty = value;
+                  });
+                }
+              },
+              items: ['easy', 'medium', 'hard']
+                  .map((level) => DropdownMenuItem(
+                        value: level,
+                        child: Text(level.toUpperCase()),
+                      ))
+                  .toList(),
+            ),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
+            ),
+            ),
+            const SizedBox(height: 20),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue, 
                         foregroundColor: Colors.white, 
                       ),
-                        onPressed: _startQuiz,
-                        child: const Text('Start Quiz'),
-                      ),
-              ],
+                    onPressed: _startQuiz,
+                    child: const Text('Start Quiz'),
+                  ),
+          ],
             ),
           ),
         ),

@@ -33,7 +33,19 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to fetch questions: $e')),
+        SnackBar(
+          content: const Text(
+            'Please retry',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          backgroundColor: Colors.blue,
+          behavior: SnackBarBehavior.floating, 
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16), 
+          duration: const Duration(seconds: 2), 
+        ),
       );
     }
 

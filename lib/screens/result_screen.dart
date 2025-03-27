@@ -19,18 +19,20 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Future<void> _saveScore() async {
-    var box = await Hive.openBox('quizScores');
-    List<Map<String, dynamic>> scores = List<Map<String, dynamic>>.from(
-        box.get('scores', defaultValue: []));
-    
-    scores.add({
-      'score': widget.score,
-      'total': widget.totalQuestions,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+  var box = await Hive.openBox('quizScores');
+  List<Map<String, dynamic>> scores = (box.get('scores', defaultValue: []) as List)
+      .map((e) => Map<String, dynamic>.from(e as Map))
+      .toList();
 
-    await box.put('scores', scores);
-  }
+  scores.add({
+    'score': widget.score,
+    'total': widget.totalQuestions,
+    'timestamp': DateTime.now().toIso8601String(),
+  });
+
+  await box.put('scores', scores);
+}
+
 
   @override
   Widget build(BuildContext context) {

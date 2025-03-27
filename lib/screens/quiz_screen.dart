@@ -98,16 +98,17 @@ class _QuizScreenState extends State<QuizScreen> {
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Text(
-                    '$_timeLeft s',
+                    '$_timeLeft s',textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 80),
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     question.question,

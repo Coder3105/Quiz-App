@@ -112,7 +112,6 @@ Response Format
 
 🏗️ Future Enhancements
 
-Add a timer per question.
 
 Implement animations for better user experience.
 
